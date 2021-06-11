@@ -1,3 +1,43 @@
+body {
+  background: #292F36;
+  height: 100vh;
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  color: #fff;
+}
 
+.title {
+  font-family: "Fredoka One", cursive;
+}
+
+.hero.is-primary {
+  background-color: #E3B505;
+  color: #fff;
+}
+.hero.is-primary .title.is-1 {
+  color: #fff;
+}
+
+#gameboard {
+  display: flex;
+  justify-content: center;
+  margin-top: 2em;
+}
+#gameboard table td {
+  width: 6em;
+  height: 6em;
+}
+#gameboard table td:first-of-type {
+  border-right: 1em solid #fff;
+}
+#gameboard table td:last-of-type {
+  border-left: 1em solid #fff;
+}
+#gameboard table tr:first-child {
+  border-bottom: 1em solid #fff;
+}
+#gameboard table tr:last-child {
+  border-top: 1em solid #fff;
+}
 
 /*# sourceMappingURL=styles.css.map */

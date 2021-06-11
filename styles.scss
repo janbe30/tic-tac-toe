@@ -1,0 +1,60 @@
+// Variables
+$darkGray : #292F36;
+$gold: #E3B505;
+
+// General
+body {
+    background: $darkGray;
+    height: 100vh;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #fff;
+}
+
+.title { 
+    font-family: 'Fredoka One', cursive;
+}
+
+.hero.is-primary {
+    background-color: $gold;
+    color: #fff;
+
+    .title.is-1 {
+        color: #fff;
+    }
+
+}
+
+// Gameboard
+#gameboard {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em;
+
+    table {
+        td {
+            width: 6em;
+            height: 6em;
+
+            &:first-of-type {
+                border-right: 1em solid #fff;
+            }
+
+            &:last-of-type {
+                border-left: 1em solid #fff;
+            }
+        } 
+        
+
+        tr:first-child {
+            border-bottom: 1em solid #fff;
+        }
+
+        tr:last-child {
+            border-top: 1em solid #fff;
+        }
+
+    
+    }
+
+}
