@@ -71,7 +71,6 @@ body {
   display: flex;
   justify-content: center;
   flex-flow: column;
-  margin-top: 2em;
 }
 .section #gameboard {
   margin: 1em auto 3em;

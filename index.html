@@ -61,20 +61,22 @@
                             <div class="control">
                               <input class="input" type="text">
                             </div>
-                            <label class="label">Sign</label>
-                            <div class="control">
-                                <label class="radio button is-link">
-                                  <input type="radio" name="sign">
-                                  <i aria-hidden="true" class="fas fa-times" title="Select X sign"></i>
-                                  <span class="sr-only">Select X sign</span>
-                                </label>
-                                <label class="radio button is-link">
-                                  <input type="radio" name="sign">
-                                  <i aria-hidden="true" class="far fa-circle" title="Select O sign"></i>
-                                  <span class="sr-only">Select O sign</span>
-                                </label>
+                            <div class="block">
+                                <!-- <label class="label">Sign</label> -->
+                                <div class="control">
+                                    <label class="radio button is-link">
+                                      <input type="radio" name="sign" checked>
+                                      <i aria-hidden="true" class="fas fa-times" title="Select X sign"></i>
+                                      <span class="sr-only">Select X sign</span>
+                                    </label>
+                                    <label class="radio button is-link">
+                                      <input type="radio" name="sign">
+                                      <i aria-hidden="true" class="far fa-circle" title="Select O sign"></i>
+                                      <span class="sr-only">Select O sign</span>
+                                    </label>
+                                </div>
                             </div>
-                            <button id="start-game" class="button is-primary">Begin!</button>
+                            <button class="button is-primary start-game" disabled>Begin!</button>
                         </div>
                         <div class="field hide" data-group="two-players">
                             <div class="block">
@@ -83,10 +85,10 @@
                                 <div class="control">
                                   <input class="input" type="text">
                                 </div>
-                                <label class="label">Sign</label>
+                                <!-- <label class="label">Sign</label> -->
                                 <div class="control">
                                     <label class="radio button is-link">
-                                      <input type="radio" name="1-sign">
+                                      <input type="radio" name="1-sign" checked>
                                       <i aria-hidden="true" class="fas fa-times" title="Select X sign"></i>
                                       <span class="sr-only">Select X sign</span>
                                     </label>
@@ -103,7 +105,7 @@
                                 <div class="control">
                                   <input class="input" type="text">
                                 </div>
-                                <label class="label">Sign</label>
+                                <!-- <label class="label">Sign</label> -->
                                 <div class="control">
                                     <label class="radio button is-link">
                                       <input type="radio" name="2-sign">
@@ -111,13 +113,13 @@
                                       <span class="sr-only">Select X sign</span>
                                     </label>
                                     <label class="radio button is-link">
-                                      <input type="radio" name="2-sign">
+                                      <input type="radio" name="2-sign" checked>
                                       <i aria-hidden="true" class="far fa-circle" title="Select O sign"></i>
                                       <span class="sr-only">Select O sign</span>
                                     </label>
                                 </div>
                             </div>
-                            <button id="start-game" class="button is-primary">Begin!</button>
+                            <button class="button is-primary start-game" disabled>Begin!</button>
                         </div>
                         
                         
