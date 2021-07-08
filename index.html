@@ -24,19 +24,19 @@
                 </div>
                 <table id="gameboard">
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td data-index='0'></td>
+                        <td data-index='1'></td>
+                        <td data-index='2'></td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td data-index='3'></td>
+                        <td data-index='4'></td>
+                        <td data-index='5'></td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td data-index='6'></td>
+                        <td data-index='7'></td>
+                        <td data-index='8'></td>
                     </tr>
                 </table>
                 <div class="block game-controls">
@@ -127,9 +127,14 @@
                             </div>
                             <button class="button is-primary start-game" disabled>Begin!</button>
                         </div>
-                        
-                        
                     </form>
+                    <div class="block active-game hide">
+                        <div><p><span id="turn"></span>'s turn</p></div>
+                        <button class="button is-primary" id="restart">
+                            <i aria-hidden="true" class="fas fa-undo-alt" title="Restart game"></i>
+                            <span class="sr-only">Restart game</span>   
+                        </button>
+                    </div>
                 </div>
             </section>           
         </main>

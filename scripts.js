@@ -1,15 +1,40 @@
 // Set up gameboard : Gameboard object using Revealing Module Pattern
 const Gameboard = (() => { 
-    let board = new Array(9);
+    let board = ['','','','','','','','','',];
     // _privateMethods
+    const _setField = (n) => {
+        return new Promise(function(resolve, reject){
+            if(n < 0 || n > 8) {
+                reject('Field number out of range');
+                return false;
+            }
+            board[n] = GameController.getCurrentPlayer().getSign();
+            console.log(board);
+            resolve('Field has been set');
+            return true;
+        });
+       
+    }
 
     // public methods 
     const startNewGame = (mode) => {
+        // reset everything
         console.log(`starting game: ${mode}`);
+    }
+
+    const checkField = (n) => {
+        if(board[n] === '' || board.length === 0){
+            console.log('clear! show sign and add to board');
+            _setField(n)
+            .then(DisplayController.placeSignOnTile(n));
+            // checkForWinningMoves (GameController) - await for Xms
+            GameController.switchPlayerTurn();
+        } 
     }
 
     return {
         startNewGame,
+        checkField
     };
 })(); //IIFE 
 
@@ -25,10 +50,6 @@ const DisplayController = (() => {
     const inputFields = document.querySelectorAll('input[type="text"]');
     let modeSelected = ''; 
     let playerInfo = {};
-
-    const init = () => {
-        _gameControlsListeners();
-    }
 
     const _gameControlsListeners = () => {
         setupBtn.addEventListener('click', function() {
@@ -73,6 +94,7 @@ const DisplayController = (() => {
                 // }
                 GameController.init();
                 Gameboard.startNewGame(modeSelected);
+                _activeGame();
             }
         )); 
 
@@ -121,10 +143,49 @@ const DisplayController = (() => {
         // });
     }
 
+    const _activeGame = () => {
+        const gameSettings = document.querySelector('div.show');
+        const activeOps = document.querySelector('div.active-game');
+        const turnDisplay = document.querySelector('#turn');
+        // Apply DRY to hide/show classes 
+        gameSettings.classList.remove('show');
+        gameSettings.classList.add('hide');
+        activeOps.classList.remove('hide');
+        activeOps.classList.add('show');
+        
+        _showCurrentPlayer(turnDisplay);
+        _trackPlayerMoves();
+        
+    }
+
+    const _showCurrentPlayer = (display) => { //Update so we can access display easily
+        display.innerHTML = GameController.getCurrentPlayer().getName();
+    }
+
+    const _trackPlayerMoves = () => {
+        let tiles = document.querySelectorAll('#gameboard td');
+        tiles.forEach( tile => tile.addEventListener('click', function(){
+                let num = this.dataset.index;
+                Gameboard.checkField(num);
+            }
+        ));
+    }
+
+    const placeSignOnTile = (n) => {
+        let selectedTile = document.querySelector(`#gameboard td[data-index="${n}`);
+        let sign = GameController.getCurrentPlayer().getSign();
+        selectedTile.innerHTML = `<span class="sign">${sign}</span>`;
+    }
+
+    const init = () => {
+        _gameControlsListeners();
+    }
+
     return {
         init,
         modeSelected,
         playerInfo,
+        placeSignOnTile
     };
 
 })();
@@ -137,30 +198,74 @@ const Player = (name, sign) => {
     const getName = () => _name;
     const getSign = () => _sign;
 
-    return { getName, getSign, };
+    return { getName, getSign };
 };
 
-// Controls all game logic and player abilities (moves)
+// Controls all game logic and player moves
 const GameController = (() => {
+    const activePlayers = [];
+    let _currentPlayer = ''; 
+    
+    const getCurrentPlayer = () => _currentPlayer;
+
     const createPlayers = () => {
-        let p = "Player";
-        // console.log(DisplayController.playerInfo);
-        for(let key in DisplayController.playerInfo){
-            let player = `${p}${key}`;
-            let name = DisplayController.playerInfo[key][0];
-            let sign = DisplayController.playerInfo[key][1];
-            console.log({name, sign});
-            player = Player(name,sign);
-            console.log(player.getName(), player.getSign());
+        return new Promise(function(resolve,reject){
+            let p = "Player";
+            let player;
+            for(let key in DisplayController.playerInfo){
+                player = `${p}${key}`;
+                let name = DisplayController.playerInfo[key][0];
+                let sign = DisplayController.playerInfo[key][1];
+                console.log({name, sign});
+                player = Player(name,sign);
+                console.log(player.getName(), player.getSign());
+                activePlayers.push(player);
+            }
+            
+            if(Object.keys(DisplayController.playerInfo).length <= 1) _createAIPlayer();
+            activePlayers.length > 0 ? resolve() : reject();
+        });
+    }
+
+    const _createAIPlayer = () => {
+        let signChosen = DisplayController.playerInfo[1][1];
+        let signForAI = signChosen === 'X'? 'O' : 'X';
+        let aiPlayer = Player('AI', signForAI);
+        console.log(aiPlayer.getName(), aiPlayer.getSign());
+        activePlayers.push(aiPlayer);
+        
+    }
+
+    const switchPlayerTurn = () => {
+        if(_currentPlayer === '') {
+            _currentPlayer = activePlayers[0];
+        } else if(_currentPlayer === activePlayers[0]){
+            _currentPlayer = activePlayers[1];
+        } else if(_currentPlayer === activePlayers[1]){
+            _currentPlayer = activePlayers[0];
         }
     }
 
+
     const init = () => {
-        createPlayers();
+        return createPlayers()
+        .then(switchPlayerTurn());
+        
     }
 
+    /* Make tiles available/unavailable based on players' move */
+
+
+    /* Check if the player has made a winner move */ 
+
+
+
     return {
-        init
+        init,
+        activePlayers,
+        getCurrentPlayer,
+        switchPlayerTurn
+
     }
 })();
 

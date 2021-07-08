@@ -68,6 +68,7 @@ body {
 
 // Hidden elements
 .hide {
+    display: none;
     overflow: hidden;
     height: 0;
     opacity: 0;
@@ -75,6 +76,7 @@ body {
 }
 
 .show {
+    display: block;
     height: auto;
     opacity: 1;
     transition-delay: 100ms;
@@ -125,7 +127,16 @@ body {
             border-top: 1em solid #fff;
         }
 
-    
+        &:hover, :focus {
+            cursor: pointer;
+        }
+
+        span.sign{
+            display: flex;
+            justify-content: center;
+            font-family: 'Fredoka One';
+            font-size: 3.5em;
+        }
     }
 
 }
@@ -138,6 +149,19 @@ div.game-controls {
 
     .label { 
         color: #fff;
+    }
+
+    .active-game {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+div.active-game {
+    p {
+        font-size: 1.76rem;
+        font-family: 'Fredoka One';
+        line-height: 3.5rem;
     }
 }
 
