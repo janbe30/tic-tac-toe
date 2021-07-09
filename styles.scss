@@ -154,6 +154,10 @@ div.game-controls {
     .active-game {
         display: flex;
         justify-content: space-between;
+        background: rgba(255,255,255, .1);
+        padding: 0.5em 1em 0.5em 1.5em;
+        border-radius: 0.4em;
+        margin: 0 -0.5em;
     }
 }
 

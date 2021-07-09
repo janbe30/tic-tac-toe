@@ -1,19 +1,23 @@
 // Set up gameboard : Gameboard object using Revealing Module Pattern
 const Gameboard = (() => { 
-    let board = ['','','','','','','','','',];
+    const _board = ['','','','','','','','','',];
+    let _xCount = 0;
+    let _oCount = 0;
+   
+    
     // _privateMethods
     const _setField = (n) => {
         return new Promise(function(resolve, reject){
             if(n < 0 || n > 8) {
                 reject('Field number out of range');
-                return false;
             }
-            board[n] = GameController.getCurrentPlayer().getSign();
-            console.log(board);
+            let sign = GameController.getCurrentPlayer().getSign();
+            _board[n] = sign;
+            sign === 'X'? _xCount++ : _oCount++;
+            if(_xCount >= 3 || _oCount >= 3) GameController.checkForWin(sign);
+            console.log(_board);
             resolve('Field has been set');
-            return true;
         });
-       
     }
 
     // public methods 
@@ -22,19 +26,32 @@ const Gameboard = (() => {
         console.log(`starting game: ${mode}`);
     }
 
+    const getBoard = () => _board;
+
     const checkField = (n) => {
-        if(board[n] === '' || board.length === 0){
+        if(_board[n] === '' || _board.length === 0){
             console.log('clear! show sign and add to board');
             _setField(n)
             .then(DisplayController.placeSignOnTile(n));
             // checkForWinningMoves (GameController) - await for Xms
             GameController.switchPlayerTurn();
-        } 
+            setTimeout(DisplayController.showCurrentPlayer, 200);
+        } else if(GameController.getCurrentPlayer().getName() === 'AI'){
+            getRandomNum();
+        }
+    }
+
+    const getRandomNum = () => {
+        let randomNum = Math.floor(Math.random() * 9);
+        checkField(randomNum);
+        
     }
 
     return {
         startNewGame,
-        checkField
+        getBoard,
+        checkField,
+        getRandomNum
     };
 })(); //IIFE 
 
@@ -146,19 +163,20 @@ const DisplayController = (() => {
     const _activeGame = () => {
         const gameSettings = document.querySelector('div.show');
         const activeOps = document.querySelector('div.active-game');
-        const turnDisplay = document.querySelector('#turn');
+        
         // Apply DRY to hide/show classes 
         gameSettings.classList.remove('show');
         gameSettings.classList.add('hide');
         activeOps.classList.remove('hide');
         activeOps.classList.add('show');
         
-        _showCurrentPlayer(turnDisplay);
+        showCurrentPlayer();
         _trackPlayerMoves();
         
     }
 
-    const _showCurrentPlayer = (display) => { //Update so we can access display easily
+    const showCurrentPlayer = () => { //Update so we can access display easily
+        let display = document.querySelector('#turn');
         display.innerHTML = GameController.getCurrentPlayer().getName();
     }
 
@@ -185,7 +203,9 @@ const DisplayController = (() => {
         init,
         modeSelected,
         playerInfo,
-        placeSignOnTile
+        placeSignOnTile,
+        showCurrentPlayer
+
     };
 
 })();
@@ -203,9 +223,31 @@ const Player = (name, sign) => {
 
 // Controls all game logic and player moves
 const GameController = (() => {
-    const activePlayers = [];
     let _currentPlayer = ''; 
-    
+    const activePlayers = [];
+    const gameOver = false;    
+
+    const _createAIPlayer = () => {
+        let signChosen = DisplayController.playerInfo[1][1];
+        let signForAI = signChosen === 'X'? 'O' : 'X';
+        let aiPlayer = Player('AI', signForAI);
+        console.log(aiPlayer.getName(), aiPlayer.getSign());
+        activePlayers.push(aiPlayer);
+        
+    }
+
+    const _winningMoves = {
+        0 : new Map([[1,0],[2,0],[3,0],[4,0],[6,0],[8,0]]),
+        1 : new Map([[0,1],[2,1],[4,1],[7,1]]),
+        2 : new Map([[0,2],[1,2],[4,2],[5,2],[6,2],[8,2]]),
+        3 : new Map([[0,3],[4,3],[5,3],[6,3]]),
+        4 : new Map([[0,4],[1,4],[2,4],[3,4],[5,4],[6,4],[7,4],[8,4]]),
+        5 : new Map([[2,5],[3,5],[4,5],[8,5]]),
+        6 : new Map([[0,6],[2,6],[3,6],[4,6],[7,6],[8,6]]),
+        7 : new Map([[1,7],[4,7],[6,7],[8,7]]),
+        8 : new Map([[0,8],[2,8],[4,8],[5,8],[6,8],[7,8]]),
+    };
+
     const getCurrentPlayer = () => _currentPlayer;
 
     const createPlayers = () => {
@@ -227,25 +269,27 @@ const GameController = (() => {
         });
     }
 
-    const _createAIPlayer = () => {
-        let signChosen = DisplayController.playerInfo[1][1];
-        let signForAI = signChosen === 'X'? 'O' : 'X';
-        let aiPlayer = Player('AI', signForAI);
-        console.log(aiPlayer.getName(), aiPlayer.getSign());
-        activePlayers.push(aiPlayer);
-        
-    }
-
     const switchPlayerTurn = () => {
         if(_currentPlayer === '') {
             _currentPlayer = activePlayers[0];
         } else if(_currentPlayer === activePlayers[0]){
             _currentPlayer = activePlayers[1];
+            if(_currentPlayer.getName() === 'AI') setTimeout(Gameboard.getRandomNum, 250);
         } else if(_currentPlayer === activePlayers[1]){
             _currentPlayer = activePlayers[0];
         }
     }
 
+    const checkForWin = (sign) => {
+        console.log(`checking if ${sign} has won`);
+        let takenTiles = [];
+        for(let i = 0; i < Gameboard.getBoard().length; i++){
+            if(Gameboard.getBoard()[i] === sign){
+                takenTiles.push(i);
+            }
+        }
+        // use takenTiles as a an arg in a new function and check if at least 3 of them make a winning move
+    }
 
     const init = () => {
         return createPlayers()
@@ -253,18 +297,12 @@ const GameController = (() => {
         
     }
 
-    /* Make tiles available/unavailable based on players' move */
-
-
-    /* Check if the player has made a winner move */ 
-
-
-
     return {
         init,
         activePlayers,
         getCurrentPlayer,
-        switchPlayerTurn
+        switchPlayerTurn,
+        checkForWin
 
     }
 })();
