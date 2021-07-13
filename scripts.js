@@ -3,6 +3,8 @@ const Gameboard = (() => {
     const _board = ['','','','','','','','','',];
     let _xCount = 0;
     let _oCount = 0;
+    let xTiles = [];
+    let oTiles = [];
    
     
     // _privateMethods
@@ -13,8 +15,15 @@ const Gameboard = (() => {
             }
             let sign = GameController.getCurrentPlayer().getSign();
             _board[n] = sign;
-            sign === 'X'? _xCount++ : _oCount++;
-            if(_xCount >= 3 || _oCount >= 3) GameController.checkForWin(sign);
+            if(sign === 'X') {
+                _xCount++;
+                xTiles.push(n);
+                if(_xCount >= 3) GameController.checkForWin(xTiles);
+            } else if(sign === 'O') {
+                _oCount++;
+                oTiles.push(n);
+                if(_oCount >= 3) GameController.checkForWin(oTiles);
+            }
             console.log(_board);
             resolve('Field has been set');
         });
@@ -237,11 +246,11 @@ const GameController = (() => {
     }
 
     const _winningMoves = {
-        0 : new Map([[1,0],[2,0],[3,0],[4,0],[6,0],[8,0]]),
-        1 : new Map([[0,1],[2,1],[4,1],[7,1]]),
-        2 : new Map([[0,2],[1,2],[4,2],[5,2],[6,2],[8,2]]),
-        3 : new Map([[0,3],[4,3],[5,3],[6,3]]),
-        4 : new Map([[0,4],[1,4],[2,4],[3,4],[5,4],[6,4],[7,4],[8,4]]),
+        0 : new Map([[1,2],[3,6],[4,8]]),
+        1 : new Map([[0,2],[4,7]]),
+        2 : new Map([[0,1],[4,6],[5,8]]),
+        3 : [[0,6],[4,5]],
+        4 : new Map([[0,8],[1,7],[2,6],[3,5]]),
         5 : new Map([[2,5],[3,5],[4,5],[8,5]]),
         6 : new Map([[0,6],[2,6],[3,6],[4,6],[7,6],[8,6]]),
         7 : new Map([[1,7],[4,7],[6,7],[8,7]]),
@@ -280,15 +289,33 @@ const GameController = (() => {
         }
     }
 
-    const checkForWin = (sign) => {
-        console.log(`checking if ${sign} has won`);
-        let takenTiles = [];
-        for(let i = 0; i < Gameboard.getBoard().length; i++){
-            if(Gameboard.getBoard()[i] === sign){
-                takenTiles.push(i);
+    const checkForWin = (tiles) => {
+        console.log(`checking if ${tiles} has won`);
+        let lastPlay = tiles[tiles.length - 1];
+        let count = 0;
+
+        for(let i = tiles.length - 2; i >= 0; i--){
+            for(let j = 0; j < _winningMoves[lastPlay].length; j++){
+                let x = 0;
+                while(x <= _winningMoves[lastPlay][j].length){
+                    console.log(tiles[i]);
+                    console.log(_winningMoves[lastPlay][j][x]);
+                    if(tiles[i] == _winningMoves[lastPlay][j][x]){
+
+                        count++;
+                        if(count >= 2) { 
+                            console.log(`${_currentPlayer} has won!`);
+                            window.alert('Winner!');
+                            return;
+                        }
+                        break;
+                    } else { 
+                        x++;
+                    }
+                }
+                
             }
         }
-        // use takenTiles as a an arg in a new function and check if at least 3 of them make a winning move
     }
 
     const init = () => {
