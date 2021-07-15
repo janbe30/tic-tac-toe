@@ -17,11 +17,11 @@ const Gameboard = (() => {
             _board[n] = sign;
             if(sign === 'X') {
                 _xCount++;
-                xTiles.push(n);
+                xTiles.push(parseInt(n));
                 if(_xCount >= 3) GameController.checkForWin(xTiles);
             } else if(sign === 'O') {
                 _oCount++;
-                oTiles.push(n);
+                oTiles.push(parseInt(n));
                 if(_oCount >= 3) GameController.checkForWin(oTiles);
             }
             console.log(_board);
@@ -184,11 +184,6 @@ const DisplayController = (() => {
         
     }
 
-    const showCurrentPlayer = () => { //Update so we can access display easily
-        let display = document.querySelector('#turn');
-        display.innerHTML = GameController.getCurrentPlayer().getName();
-    }
-
     const _trackPlayerMoves = () => {
         let tiles = document.querySelectorAll('#gameboard td');
         tiles.forEach( tile => tile.addEventListener('click', function(){
@@ -198,10 +193,23 @@ const DisplayController = (() => {
         ));
     }
 
+    const showCurrentPlayer = () => { //Update so we can access display easily
+        let display = document.querySelector('#turn');
+        display.innerHTML = GameController.getCurrentPlayer().getName();
+    }
+
     const placeSignOnTile = (n) => {
         let selectedTile = document.querySelector(`#gameboard td[data-index="${n}`);
         let sign = GameController.getCurrentPlayer().getSign();
         selectedTile.innerHTML = `<span class="sign">${sign}</span>`;
+    }
+
+    const displayGameOver = (boolean) => {
+        if(boolean === true) {
+            console.log('Winner!');
+        } else if(boolean === false) {
+            console.log('Draw!');
+        }
     }
 
     const init = () => {
@@ -213,7 +221,8 @@ const DisplayController = (() => {
         modeSelected,
         playerInfo,
         placeSignOnTile,
-        showCurrentPlayer
+        showCurrentPlayer,
+        displayGameOver
 
     };
 
@@ -234,7 +243,7 @@ const Player = (name, sign) => {
 const GameController = (() => {
     let _currentPlayer = ''; 
     const activePlayers = [];
-    const gameOver = false;    
+    let gameOver = false;    
 
     const _createAIPlayer = () => {
         let signChosen = DisplayController.playerInfo[1][1];
@@ -244,18 +253,6 @@ const GameController = (() => {
         activePlayers.push(aiPlayer);
         
     }
-
-    const _winningMoves = {
-        0 : new Map([[1,2],[3,6],[4,8]]),
-        1 : new Map([[0,2],[4,7]]),
-        2 : new Map([[0,1],[4,6],[5,8]]),
-        3 : [[0,6],[4,5]],
-        4 : new Map([[0,8],[1,7],[2,6],[3,5]]),
-        5 : new Map([[2,5],[3,5],[4,5],[8,5]]),
-        6 : new Map([[0,6],[2,6],[3,6],[4,6],[7,6],[8,6]]),
-        7 : new Map([[1,7],[4,7],[6,7],[8,7]]),
-        8 : new Map([[0,8],[2,8],[4,8],[5,8],[6,8],[7,8]]),
-    };
 
     const getCurrentPlayer = () => _currentPlayer;
 
@@ -279,42 +276,40 @@ const GameController = (() => {
     }
 
     const switchPlayerTurn = () => {
-        if(_currentPlayer === '') {
-            _currentPlayer = activePlayers[0];
-        } else if(_currentPlayer === activePlayers[0]){
-            _currentPlayer = activePlayers[1];
-            if(_currentPlayer.getName() === 'AI') setTimeout(Gameboard.getRandomNum, 250);
-        } else if(_currentPlayer === activePlayers[1]){
-            _currentPlayer = activePlayers[0];
+        while(!gameOver){
+            if(_currentPlayer === '') {
+                _currentPlayer = activePlayers[0];
+            } else if(_currentPlayer === activePlayers[0]){
+                _currentPlayer = activePlayers[1];
+                if(_currentPlayer.getName() === 'AI') setTimeout(Gameboard.getRandomNum, 250);
+            } else if(_currentPlayer === activePlayers[1]){
+                _currentPlayer = activePlayers[0];
+            }
         }
+        return;
     }
 
     const checkForWin = (tiles) => {
         console.log(`checking if ${tiles} has won`);
-        let lastPlay = tiles[tiles.length - 1];
-        let count = 0;
+        const winningMoves = [
+            [0,1,2],[0,3,6],[0,4,8],
+            [1,4,7],[2,4,6],[2,5,8],
+            [3,4,5],[6,7,8]
+        ];
+        
+        tiles.sort((a,b) => a - b);
+        console.log(tiles);
+        
+        let bool = winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
+            return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
+                console.log(tiles[index] +' ' + prop);
+                return tiles[index] === prop;
+            })
+        });
 
-        for(let i = tiles.length - 2; i >= 0; i--){
-            for(let j = 0; j < _winningMoves[lastPlay].length; j++){
-                let x = 0;
-                while(x <= _winningMoves[lastPlay][j].length){
-                    console.log(tiles[i]);
-                    console.log(_winningMoves[lastPlay][j][x]);
-                    if(tiles[i] == _winningMoves[lastPlay][j][x]){
-
-                        count++;
-                        if(count >= 2) { 
-                            console.log(`${_currentPlayer} has won!`);
-                            window.alert('Winner!');
-                            return;
-                        }
-                        break;
-                    } else { 
-                        x++;
-                    }
-                }
-                
-            }
+        if(bool) {
+            gameOver = true;
+            DisplayController.displayGameOver(bool);
         }
     }
 
