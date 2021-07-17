@@ -13,6 +13,7 @@ const Gameboard = (() => {
             if(n < 0 || n > 8) {
                 reject('Field number out of range');
             }
+
             let sign = GameController.getCurrentPlayer().getSign();
             _board[n] = sign;
             DisplayController.placeSignOnTile(n);
@@ -31,6 +32,23 @@ const Gameboard = (() => {
         });
     }
 
+    const _isBoardFull = () => {
+        let emptyTiles = false;
+        for(let i = 0; i < _board.length; i++){
+            if(_board[i] === ''){
+                console.log('there are still empty fields');
+                emptyTiles = true;
+                return;
+            } 
+        }
+        if(!emptyTiles){
+            console.log("no more fields left. it's a draw!");
+            GameController.gameOver = true;
+            DisplayController.displayGameOver(false);
+        }
+    }
+
+
     // public methods 
     const startNewGame = (mode) => {
         // reset everything
@@ -43,12 +61,30 @@ const Gameboard = (() => {
         if(_board[n] === '' || _board.length === 0){
             console.log('clear! show sign and add to board');
             _setField(n)
+            .then(_isBoardFull); // Check if all tiles are filled 
             // .then(DisplayController.placeSignOnTile(n));
             // checkForWinningMoves (GameController) - await for Xms
             GameController.switchPlayerTurn();
             setTimeout(DisplayController.showCurrentPlayer, 200);
         } else if(GameController.getCurrentPlayer().getName() === 'AI'){
             getRandomNum();
+        }
+    }
+
+    const resetBoard = () => {
+        _xCount = 0;
+        _oCount = 0;
+
+        for(let x of _board){
+            delete _board[x];
+        }
+
+        for(let y of xTiles){
+            delete xTiles[y];
+        }
+
+        for(let z of oTiles){
+            delete oTiles[z];
         }
     }
 
@@ -62,7 +98,8 @@ const Gameboard = (() => {
         startNewGame,
         getBoard,
         checkField,
-        getRandomNum
+        getRandomNum,
+        resetBoard
     };
 })(); //IIFE 
 
@@ -174,16 +211,18 @@ const DisplayController = (() => {
     const _activeGame = () => {
         const gameSettings = document.querySelector('div.show');
         const activeOps = document.querySelector('div.active-game');
+        const restartBtn = document.querySelector('button#restart');
         
         // Apply DRY to hide/show classes 
-        gameSettings.classList.remove('show');
-        gameSettings.classList.add('hide');
-        activeOps.classList.remove('hide');
-        activeOps.classList.add('show');
+        // gameSettings.classList.remove('show');
+        // gameSettings.classList.add('hide');
+        // activeOps.classList.remove('hide');
+        // activeOps.classList.add('show');
+        _toggleElems(activeOps, gameSettings);
         
+        restartBtn.addEventListener('click', _reset);
         showCurrentPlayer();
         _trackPlayerMoves();
-        
     }
 
     const _trackPlayerMoves = () => {
@@ -193,6 +232,34 @@ const DisplayController = (() => {
                 Gameboard.checkField(num);
             }
         ));
+    }
+
+    const _reset = () => {
+        modeSelected = '';
+        let tiles = document.querySelectorAll('#gameboard td');
+        let activeOps = document.querySelector('div.active-game');
+
+        for(let key in playerInfo){
+            delete playerInfo[key];
+        }
+
+        tiles.forEach(tile => {
+            if(tile.hasChildNodes()){
+                tile.removeChild(tile.firstChild);
+            }
+        });
+
+        _toggleElems(setupBtn, activeOps);
+        Gameboard.resetBoard();
+        GameController.resetGame();   
+        init();
+    }
+
+    const _toggleElems = (elemToShow, elemToHide) => {
+        elemToShow.classList.remove('hide');
+        elemToShow.classList.add('show');
+        elemToHide.classList.remove('show');
+        elemToHide.classList.add('hide');
     }
 
     const showCurrentPlayer = () => { //Update so we can access display easily
@@ -209,12 +276,10 @@ const DisplayController = (() => {
     const displayGameOver = (boolean) => {
         let textElem = document.querySelector('.modal p');
         if(boolean === true) {
-            console.log('Winner!');
-            textElem.innerHTML = `<span>${GameController.getCurrentPlayer().getName()}</span> wins! &#x1F389;`
+                textElem.innerHTML = `<span>${GameController.getCurrentPlayer().getName()}</span> wins! &#x1F389;`
 
         } else if(boolean === false) {
-            console.log('Draw!');
-            TextTrack.innerHTML = 'Draw!';
+            textElem.innerHTML = "It's a draw!";
         }
         let modal = document.querySelector('.modal');
         let htmlBody = document.querySelector('html');
@@ -258,6 +323,7 @@ const GameController = (() => {
     let _currentPlayer = ''; 
     const activePlayers = [];
     let gameOver = false;    
+    let gameWon = false; 
 
     const _createAIPlayer = () => {
         let signChosen = DisplayController.playerInfo[1][1];
@@ -314,15 +380,26 @@ const GameController = (() => {
         tiles.sort((a,b) => a - b);
         console.log(tiles);
         
-        let bool = winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
+        gameWon = winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
             return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
                 return tiles[index] === prop;
             })
         });
 
-        if(bool) {
+        if(gameWon) {
             gameOver = true;
-            DisplayController.displayGameOver(bool);
+            DisplayController.displayGameOver(gameWon);
+        }
+    }
+
+    const resetGame = () => {
+        // Reset global vars
+        _currentPlayer = ''; 
+        gameOver = false;    
+        gameWon = false; 
+
+        for(let x of activePlayers){
+            delete activePlayers[x];
         }
     }
 
@@ -330,7 +407,6 @@ const GameController = (() => {
     const init = () => {
         return createPlayers()
         .then(switchPlayerTurn());
-        
     }
 
     return {
@@ -338,8 +414,8 @@ const GameController = (() => {
         activePlayers,
         getCurrentPlayer,
         switchPlayerTurn,
-        checkForWin
-
+        checkForWin,
+        resetGame
     }
 })();
 
