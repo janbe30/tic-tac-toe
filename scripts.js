@@ -15,6 +15,8 @@ const Gameboard = (() => {
             }
             let sign = GameController.getCurrentPlayer().getSign();
             _board[n] = sign;
+            DisplayController.placeSignOnTile(n);
+
             if(sign === 'X') {
                 _xCount++;
                 xTiles.push(parseInt(n));
@@ -41,7 +43,7 @@ const Gameboard = (() => {
         if(_board[n] === '' || _board.length === 0){
             console.log('clear! show sign and add to board');
             _setField(n)
-            .then(DisplayController.placeSignOnTile(n));
+            // .then(DisplayController.placeSignOnTile(n));
             // checkForWinningMoves (GameController) - await for Xms
             GameController.switchPlayerTurn();
             setTimeout(DisplayController.showCurrentPlayer, 200);
@@ -205,11 +207,19 @@ const DisplayController = (() => {
     }
 
     const displayGameOver = (boolean) => {
+        let textElem = document.querySelector('.modal p');
         if(boolean === true) {
             console.log('Winner!');
+            textElem.innerHTML = `<span>${GameController.getCurrentPlayer().getName()}</span> wins! &#x1F389;`
+
         } else if(boolean === false) {
             console.log('Draw!');
+            TextTrack.innerHTML = 'Draw!';
         }
+        let modal = document.querySelector('.modal');
+        let htmlBody = document.querySelector('html');
+        modal.classList.add('is-active');
+        htmlBody.classList.add('is-clipped');
     }
 
     const init = () => {
@@ -236,7 +246,11 @@ const Player = (name, sign) => {
     const getName = () => _name;
     const getSign = () => _sign;
 
-    return { getName, getSign };
+    const playerToString = function() {
+        return `${this._name}`;
+    }
+
+    return { getName, getSign, playerToString };
 };
 
 // Controls all game logic and player moves
@@ -276,7 +290,7 @@ const GameController = (() => {
     }
 
     const switchPlayerTurn = () => {
-        while(!gameOver){
+        if(!gameOver){
             if(_currentPlayer === '') {
                 _currentPlayer = activePlayers[0];
             } else if(_currentPlayer === activePlayers[0]){
@@ -302,7 +316,6 @@ const GameController = (() => {
         
         let bool = winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
             return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
-                console.log(tiles[index] +' ' + prop);
                 return tiles[index] === prop;
             })
         });
@@ -312,6 +325,7 @@ const GameController = (() => {
             DisplayController.displayGameOver(bool);
         }
     }
+
 
     const init = () => {
         return createPlayers()
