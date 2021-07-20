@@ -1,6 +1,6 @@
 // Set up gameboard : Gameboard object using Revealing Module Pattern
 const Gameboard = (() => { 
-    const _board = ['','','','','','','','','',];
+    let _board = ['','','','','','','','','',];
     let _xCount = 0;
     let _oCount = 0;
     let xTiles = [];
@@ -75,17 +75,11 @@ const Gameboard = (() => {
         _xCount = 0;
         _oCount = 0;
 
-        for(let x of _board){
-            delete _board[x];
-        }
+        _board = ['','','','','','','','','',];
+        console.log(_board);
+        xTiles = [];
+        oTiles = [];
 
-        for(let y of xTiles){
-            delete xTiles[y];
-        }
-
-        for(let z of oTiles){
-            delete oTiles[z];
-        }
     }
 
     const getRandomNum = () => {
@@ -113,13 +107,14 @@ const DisplayController = (() => {
     const playerSelectionOps = document.querySelector('[data-group="player-selection"]');
     const startBtn = document.querySelectorAll('.start-game');
     const inputFields = document.querySelectorAll('input[type="text"]');
+    let modal = document.querySelector('.modal');
+    let htmlBody = document.querySelector('html');
     let modeSelected = ''; 
     let playerInfo = {};
 
     const _gameControlsListeners = () => {
         setupBtn.addEventListener('click', function() {
-            this.classList.add('hide');
-            _showPlayerOptions();
+            _toggleElems(playerSelectionOps, setupBtn);
         });
 
         playerSelBtns.forEach( playerBtn => playerBtn.addEventListener(
@@ -165,10 +160,10 @@ const DisplayController = (() => {
 
     }
 
-    const _showPlayerOptions = () => {
-        playerSelectionOps.classList.remove('hide');
-        playerSelectionOps.classList.add('show');
-    }
+    // const _showPlayerOptions = () => {
+    //     playerSelectionOps.classList.remove('hide');
+    //     playerSelectionOps.classList.add('show');
+    // }
 
     const _showGameSettings = (selection) => {
         let onePlayerOps = document.querySelector('[data-group="one-player"');
@@ -211,7 +206,7 @@ const DisplayController = (() => {
     const _activeGame = () => {
         const gameSettings = document.querySelector('div.show');
         const activeOps = document.querySelector('div.active-game');
-        const restartBtn = document.querySelector('button#restart');
+        const restartBtn = document.querySelectorAll('button.restart');
         
         // Apply DRY to hide/show classes 
         // gameSettings.classList.remove('show');
@@ -219,10 +214,9 @@ const DisplayController = (() => {
         // activeOps.classList.remove('hide');
         // activeOps.classList.add('show');
         _toggleElems(activeOps, gameSettings);
-        
-        restartBtn.addEventListener('click', _reset);
         showCurrentPlayer();
         _trackPlayerMoves();
+        restartBtn.forEach( btn => btn.addEventListener('click', _reset));
     }
 
     const _trackPlayerMoves = () => {
@@ -249,10 +243,15 @@ const DisplayController = (() => {
             }
         });
 
+        if(modal.classList.contains('is-active')){
+            modal.classList.remove('is-active');
+            htmlBody.classList.remove('is-active');
+        }
+        
         _toggleElems(setupBtn, activeOps);
         Gameboard.resetBoard();
         GameController.resetGame();   
-        init();
+        //init();
     }
 
     const _toggleElems = (elemToShow, elemToHide) => {
@@ -281,8 +280,7 @@ const DisplayController = (() => {
         } else if(boolean === false) {
             textElem.innerHTML = "It's a draw!";
         }
-        let modal = document.querySelector('.modal');
-        let htmlBody = document.querySelector('html');
+
         modal.classList.add('is-active');
         htmlBody.classList.add('is-clipped');
     }
@@ -321,7 +319,7 @@ const Player = (name, sign) => {
 // Controls all game logic and player moves
 const GameController = (() => {
     let _currentPlayer = ''; 
-    const activePlayers = [];
+    let activePlayers = [];
     let gameOver = false;    
     let gameWon = false; 
 
@@ -397,10 +395,7 @@ const GameController = (() => {
         _currentPlayer = ''; 
         gameOver = false;    
         gameWon = false; 
-
-        for(let x of activePlayers){
-            delete activePlayers[x];
-        }
+        activePlayers = [];
     }
 
 
