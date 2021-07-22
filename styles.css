@@ -170,7 +170,12 @@ div.active-game {
   margin: 0 -0.5em;
 }
 div.active-game div {
-  margin-right: 4em;
+  margin-right: 1.5em;
+}
+@media (min-width: 768px) {
+  div.active-game div {
+    margin-right: 4em;
+  }
 }
 div.active-game p {
   font-size: 1.76rem;

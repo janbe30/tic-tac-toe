@@ -225,7 +225,11 @@ div.active-game {
     margin: 0 -0.5em;
 
     div {
-        margin-right: 4em;
+        margin-right: 1.5em;
+        @include breakpoint(med-screen){
+            margin-right: 4em;
+        }
+        
     }
 
     p {

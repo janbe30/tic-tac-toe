@@ -42,8 +42,7 @@ const Gameboard = (() => {
             } 
         }
         if(!emptyTiles){
-            console.log("no more fields left. it's a draw!");
-            GameController.gameOver = true;
+             GameController.gameOver = true;
             DisplayController.displayGameOver(false);
         }
     }
@@ -51,7 +50,6 @@ const Gameboard = (() => {
 
     // public methods 
     const startNewGame = (mode) => {
-        // reset everything
         console.log(`starting game: ${mode}`);
     }
 
@@ -98,14 +96,11 @@ const Gameboard = (() => {
 })(); //IIFE 
 
 // Set up display : Display Controller object using Revealing Module Pattern
-/*
- *  TODO: Implement form validation: If player(s) have no filled out name and/or sign, the button to Begin game will not become Active. Once they do, the button is enabled and calls Gameboard.startGame and Players objs.
- */ 
 const DisplayController = (() => {
     const setupBtn = document.getElementById('setup-game');
     const playerSelBtns = document.querySelectorAll('[data-group="player-selection"] label.radio');
     const playerSelectionOps = document.querySelector('[data-group="player-selection"]');
-    const startBtn = document.querySelectorAll('.start-game');
+    const startBtns = document.querySelectorAll('.start-game');
     const inputFields = document.querySelectorAll('input[type="text"]');
     let modal = document.querySelector('.modal');
     let htmlBody = document.querySelector('html');
@@ -131,13 +126,16 @@ const DisplayController = (() => {
             'input', function(){
                 if(!input.hasAttribute('data-valid') && input.value.length >= 2) {
                     input.setAttribute('data-valid', true);
-                } else {
+                } //else if(input.getAttribute('data-valid') === false && input.value.length >=2) {
+                //     input.setAttribute('data-valid', true);
+                // }
+                else {
                     _validateInput();
                 }
             }
         ));
 
-        startBtn.forEach( startBtn => startBtn.addEventListener(
+        startBtns.forEach( startBtn => startBtn.addEventListener(
             'click', function(e){
                 e.preventDefault();
                 let validInputs = document.querySelectorAll('div.show input[data-valid="true"], div.show input:checked');
@@ -149,21 +147,18 @@ const DisplayController = (() => {
                     }
                     playerInfo[playerKey].push(validInputs[i].value);
                 }
+
                 // for(let key in playerInfo){
                 //     console.log(`key: ${key}, value: ${playerInfo[key]}`);
                 // }
                 GameController.init();
                 Gameboard.startNewGame(modeSelected);
                 _activeGame();
+                _resetFormSettings();
             }
         )); 
 
     }
-
-    // const _showPlayerOptions = () => {
-    //     playerSelectionOps.classList.remove('hide');
-    //     playerSelectionOps.classList.add('show');
-    // }
 
     const _showGameSettings = (selection) => {
         let onePlayerOps = document.querySelector('[data-group="one-player"');
@@ -194,13 +189,6 @@ const DisplayController = (() => {
         if(check === true){ 
             document.querySelector('div.show button.start-game').removeAttribute('disabled');
         }
-        // let radioFields = document.querySelectorAll('div.show input[type="radio"]');
-        // radioFields.forEach( field => {
-        //     if(field.checked) {
-        //         field.setAttribute('data-valid', true);
-        //     }
-        //     field.closest('input[type="radio"').setAttribute('data-valid', true); // set 'sibling' radio to true as well
-        // });
     }
 
     const _activeGame = () => {
@@ -208,11 +196,6 @@ const DisplayController = (() => {
         const activeOps = document.querySelector('div.active-game');
         const restartBtn = document.querySelectorAll('button.restart');
         
-        // Apply DRY to hide/show classes 
-        // gameSettings.classList.remove('show');
-        // gameSettings.classList.add('hide');
-        // activeOps.classList.remove('hide');
-        // activeOps.classList.add('show');
         _toggleElems(activeOps, gameSettings);
         showCurrentPlayer();
         _trackPlayerMoves();
@@ -226,6 +209,18 @@ const DisplayController = (() => {
                 Gameboard.checkField(num);
             }
         ));
+    }
+
+    const _resetFormSettings = () => {
+        document.getElementById('settings').reset();
+        inputFields.forEach( field => {
+            field.removeAttribute('data-valid');
+        });
+        startBtns.forEach( startBtn => {
+            if(startBtn.hasAttribute('disabled') === false) {
+                startBtn.setAttribute('disabled', '');
+            }
+        });
     }
 
     const _reset = () => {
