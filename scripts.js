@@ -245,9 +245,9 @@ const DisplayController = (() => {
 
         if(modal.classList.contains('is-active')){
             modal.classList.remove('is-active');
-            htmlBody.classList.remove('is-active');
+            htmlBody.classList.remove('is-clipped');
         }
-        
+
         _toggleElems(setupBtn, activeOps);
         Gameboard.resetBoard();
         GameController.resetGame();   
@@ -329,7 +329,20 @@ const GameController = (() => {
         let aiPlayer = Player('AI', signForAI);
         console.log(aiPlayer.getName(), aiPlayer.getSign());
         activePlayers.push(aiPlayer);
-        
+    }
+
+    const _getPermutations = (arr) => {
+        if(arr.length < 2) return arr;
+        let permutations = [];
+        for(let i = 0; i < arr.length; i++){
+            let elem = [arr[i]];
+            let remainingElems = arr.slice(0,i).concat(arr.slice(i+1));
+            for(let permutation of _getPermutations(remainingElems)){
+                permutations.push(elem.concat(permutation));
+            }
+        }
+        console.log(permutations);
+        return permutations;
     }
 
     const getCurrentPlayer = () => _currentPlayer;
@@ -376,13 +389,28 @@ const GameController = (() => {
         ];
         
         tiles.sort((a,b) => a - b);
-        console.log(tiles);
+       // console.log(_getPermutations(tiles));
         
-        gameWon = winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
-            return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
-                return tiles[index] === prop;
-            })
-        });
+        // gameWon = _getPermutations(tiles).some(function(combo){
+        //                 winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
+        //                 return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
+        //                     return combo[index] === prop;
+        //                 })
+        //             })
+        // });
+
+        // gameWon =  winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
+        //                 return arr.every(function(prop, index) {    // prop = each of the elems in the arrays
+        //                     return tiles[index] === prop;
+        //                 })
+        //             });
+
+        gameWon =  winningMoves.some(function(arr) {    // checks if at least one element passes the test in function below (callback)
+                            let count = 0;
+                            return arr.every(function(prop) {    // prop = each of the elems in the arrays
+                                return tiles.indexOf(prop) >= 0;
+                            })
+                        });
 
         if(gameWon) {
             gameOver = true;

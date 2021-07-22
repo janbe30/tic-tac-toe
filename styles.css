@@ -1,3 +1,4 @@
+/* Breakpoints */
 body {
   background: #292F36;
   height: 100vh;
@@ -30,6 +31,18 @@ body {
 }
 .button.is-primary:hover, .button.is-primary:focus {
   background: #048B63;
+}
+@media (min-width: 768px) {
+  .button.is-primary {
+    min-width: 12.5em;
+  }
+  .button.is-primary.start-game {
+    display: flex;
+    margin: 0 auto;
+  }
+  .button.is-primary.restart {
+    min-width: auto;
+  }
 }
 
 .button.is-link {
@@ -107,11 +120,48 @@ div.game-controls {
   display: flex;
   justify-content: center;
   flex-flow: column nowrap;
+  align-items: center;
 }
 div.game-controls .label {
   color: #fff;
 }
-div.game-controls .active-game {
+div.game-controls div.field {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.4em;
+  padding: 2em 4em;
+  margin: 2em -2em;
+}
+@media (min-width: 768px) {
+  div.game-controls div.field {
+    border-radius: 0.5em;
+    padding: 1em 2em;
+    margin-top: 0;
+  }
+}
+div.game-controls div[data-group=player-selection] {
+  padding: 1em 0.5em;
+}
+@media (min-width: 768px) {
+  div.game-controls div[data-group=two-players] > div {
+    display: inline-block;
+  }
+  div.game-controls div[data-group=two-players] > div:first-of-type {
+    margin: 0 2em 2em 1em;
+  }
+  div.game-controls div[data-group=two-players] > div:nth-child(2) {
+    margin: 0 1em 0 2em;
+  }
+}
+
+form input {
+  font-family: "Roboto";
+  letter-spacing: 1px;
+  color: rgba(41, 47, 54, 0.7);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+div.active-game {
   display: flex;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.1);
@@ -119,16 +169,26 @@ div.game-controls .active-game {
   border-radius: 0.4em;
   margin: 0 -0.5em;
 }
-
+div.active-game div {
+  margin-right: 4em;
+}
 div.active-game p {
   font-size: 1.76rem;
   font-family: "Fredoka One";
   line-height: 3.5rem;
 }
+div.active-game p span {
+  text-transform: capitalize;
+}
 
 div.modal .box {
   display: flex;
   flex-flow: column;
+}
+@media (min-width: 768px) {
+  div.modal .box {
+    padding: 2em 3.5em;
+  }
 }
 div.modal p {
   font-family: "Roboto", sans-serif;
